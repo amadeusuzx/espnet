@@ -9,8 +9,8 @@
 # Available directories:
 # DCT_Features/features/{5,10,20,30}-dct
 # Auto_Features/features/{5,10,20,30}d
-# e.g., ssc_data_prepare.sh --feat_dir Auto_Features/features/30d
-#       ssc_data_prepare.sh --feat_dir DCT_Features/features/20-dct"
+# e.g., ssc_data_prepare.sh Auto_Features/features/30d
+#       ssc_data_prepare.sh DCT_Features/features/20-dct"
 
 . ./path.sh
 
@@ -21,15 +21,14 @@ mkdir -p ${feat_local_dir}
 wget -c -N ftp://ftp.espci.fr/pub/sigma/Features/${feat_dir}/* -P ${feat_local_dir}
 wget -c -N https://ftp.espci.fr/pub/sigma/TIMIT_training/TIMIT_Transcripts.txt -P ${feat_local_dir}
 wget -c -N https://ftp.espci.fr/pub/sigma/WSJ05K_Test/WSJ0_5K_Transcripts.txt -P ${feat_local_dir}
-
-mkdir -p data/train
-mkdir -p data/test
-
-sed "s/^[0-9]*[.].//g" ${feat_local_dir}/TIMIT_Transcripts.txt  | sed "s/([^)]*)//g" | tr [:lower:] [:upper:] > data/train/text
-sed "s/^[0-9]*[.].//g" ${feat_local_dir}/WSJ0_5K_Transcripts.txt | sed "s/([^)]*)//g" | tr [:lower:] [:upper:] > data/test/text
 for x in train test; do
+    mkdir -p data/${x}
     sed "s% .*mfcc/% "${PWD}"/"${feat_local_dir}"/%g" ${feat_local_dir}/${x}*.scp \
     | sed "s/t\([0-9]\)_/t0\1_/g" | sort -o data/${x}/feats.scp
 done
+
+sed "s/^[0-9]*[.].//g" ${feat_local_dir}/TIMIT_Transcripts.txt  | sed "s/([^)]*)//g" | tr [:lower:] [:upper:] > data/train/text
+sed "s/^[0-9]*[.].//g" ${feat_local_dir}/WSJ0_5K_Transcripts.txt | sed "s/([^)]*)//g" | tr [:lower:] [:upper:] > data/test/text
+
 
 local/featprepare.py
